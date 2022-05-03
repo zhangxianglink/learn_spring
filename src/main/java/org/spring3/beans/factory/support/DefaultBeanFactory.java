@@ -4,6 +4,8 @@ import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.spring3.beans.BeanDefinition;
+import org.spring3.beans.factory.BeanCreationException;
+import org.spring3.beans.factory.BeanDefinitionStoreException;
 import org.spring3.beans.factory.BeanFactory;
 import org.spring3.utils.ClassUtils;
 
@@ -47,7 +49,7 @@ public class DefaultBeanFactory implements BeanFactory {
                 this.beanDefinitionMap.put(id,bd);
             }
         }catch (Exception e){
-            throw new RuntimeException("加载失败");
+            throw new BeanDefinitionStoreException("IOException parsing xml documents");
         }
 
     }
@@ -61,7 +63,7 @@ public class DefaultBeanFactory implements BeanFactory {
     public Object getBean(String beanId) {
         BeanDefinition bd = this.getBeanDefinition(beanId);
         if (bd == null ){
-            return null;
+            throw new BeanCreationException("BeanDefinition对象不存在");
         }
          ClassLoader cl = ClassUtils.getDefaultClassLoader();
          String beanClassName = bd.getBeanClassName();
@@ -69,7 +71,7 @@ public class DefaultBeanFactory implements BeanFactory {
             Class<?> clz = cl.loadClass(beanClassName);
             return clz.newInstance();
         } catch (Exception e) {
-            throw new RuntimeException("获取bean失败");
+            throw new BeanCreationException("实例化对象失败",beanClassName,e);
         }
     }
 }
